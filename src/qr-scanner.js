@@ -1,6 +1,9 @@
 export default class QrScanner {
     /* async */
     static hasCamera() {
+        if (!navigator.mediaDevices) {
+            return Promise.reject(false);
+        }
         // note that enumerateDevices can always be called and does not prompt the user for permission. However, device
         // labels are only readable if served via https and an active media stream exists or permanent permission is
         // given. That doesn't matter for us though as we don't require labels.
