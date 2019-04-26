@@ -81,6 +81,10 @@ export default class QrScanner {
                 return this._getCameraStream(); // throws if camera is not accessible (e.g. due to not https)
             })
             .then(stream => {
+                // `environment` constrain result `user` facing stream in Safari, fix it
+                if (this._isUserFacing(stream)) {
+                    facingMode = 'user';
+                }
                 this.$video.srcObject = stream;
                 this._setVideoMirror(facingMode);
             })
@@ -253,6 +257,11 @@ export default class QrScanner {
         // in user facing mode mirror the video to make it easier for the user to position the QR code
         const scaleFactor = facingMode==='user'? -1 : 1;
         this.$video.style.transform = 'scaleX(' + scaleFactor + ')';
+    }
+
+    _isUserFacing(videoStream) {
+        const userFacingModePattern = /front|user|face/i;
+        return userFacingModePattern.test(videoStream.getVideoTracks()[0].label);
     }
 
     static _getImageData(image, sourceRect=null, canvas=null, fixedCanvasSize=false) {
