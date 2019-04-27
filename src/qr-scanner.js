@@ -218,6 +218,12 @@ export default class QrScanner {
         if (!this._active || this.$video.paused || this.$video.ended) return false;
         // using requestAnimationFrame to avoid scanning if tab is in background
         requestAnimationFrame(() => {
+            // prevent ineffectual scan which result processing previous successful image and false positive decode
+            // context.drawImage() only works correctly on an video when its readyState is greater than 1 @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage#Notes
+            if (this.$video.readyState <= 1) {
+                this._scanFrame();
+                return;
+            }
             QrScanner.scanImage(this.$video, this._sourceRect, this._qrWorker, this.$canvas, true)
                 .then(this._onDecode, error => {
                     if (this._active && error !== 'QR code not found.') {
